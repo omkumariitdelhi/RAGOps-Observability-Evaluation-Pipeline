@@ -1,0 +1,52 @@
+[
+    {
+        "question": "What open-source library is the openHFDIBRANS solver built upon, and what four specific two-equation turbulence models does it implement?",
+        "contexts": [],
+        "ground_truth": "* **Base Library:** OpenFOAM.\n* **Implemented Turbulence Models:** 1. Standard $k-\\omega$\n2. Standard $k-\\epsilon$\n3. Menter's $k-\\omega$ Shear Stress Transport (SST)\n4. Realizable $k-\\epsilon$"
+    },
+    {
+        "question": "How does the openHFDIBRANS solver modify the handling of the incompressibility condition to prevent conflict with the immersed boundary method (IBM) forcing?",
+        "contexts": [],
+        "ground_truth": "The solver restricts the enforcement of the incompressibility condition strictly to the fluid region of the computational domain. This is achieved by multiplying the mass conservation equation by $(1-\\lambda)$, where $\\lambda$ represents the fictitious domain indicator function. This prevents numerical conflicts with the IBM forcing term inside solid or interface regions during initial steady-state iterations."
+    },
+    {
+        "question": "What is the exact mathematical formula used by openHFDIBRANS to compute the effective perpendicular distance ($y_{eff}$) for determining the normalized wall distance $y_{ib}^+$?",
+        "contexts": [],
+        "ground_truth": "The effective perpendicular distance is calculated using the following formula:\n$$y_{eff} = 0.5 \\left[ y_{\\perp} + 0.5 \\cdot V(\\Omega_P^h)^{1/3} \\right]$$\nWhere:\n* $y_{\\perp}$ is the geometric perpendicular distance from the cell center to the solid boundary.\n* $V(\\Omega_P^h)$ is the volume of the respective computational cell."
+    },
+    {
+        "question": "What core cooperative game theory concept does the paper use to formally cast the choice-based metric, ensuring a fair allocation of value across data offerings?",
+        "contexts": [],
+        "ground_truth": "The framework utilizes the **Shapley value** from cooperative game theory to distribute and allocate data product value equitably across different offerings based on user selection configurations."
+    },
+    {
+        "question": "In the probabilistic model of consumer choice containing $n$ offerings and $m$ consumers, what is the formula for the total number of system configurations ($|S|$)?",
+        "contexts": [],
+        "ground_truth": "The total number of unique system configurations $|S|$ is given by:\n$$|S| = (2^n)^m$$"
+    },
+    {
+        "question": "Explain how the proposed choice-based metric counteracts the limitations of popularity-based metrics regarding \"long-tail\" data products.",
+        "contexts": [],
+        "ground_truth": "Popularity-based metrics rely strictly on raw access counts, which undervalue niche or specialized data. The proposed choice-based metric scores offerings as an inverse function of consumer preferences across all other items within a bundle selection. By rewarding uniqueness and discriminative choice behavior (where a consumer selectively chooses a rare item over common ones), it assigns high value to distinct, long-tail data products."
+    },
+    {
+        "question": "What two intrinsic characteristics of data products cause traditional economic valuation models to fail according to the authors?",
+        "contexts": [],
+        "ground_truth": "1. The **non-rival** nature of data (consumption by one user does not deplete its availability for others).\n2. The prevalence of **non-monetary exchanges** (such as intracompany data sharing where explicit price discovery mechanisms are missing)."
+    },
+    {
+        "question": "What are Attributed Feature Graphs (AFGs), and what specific architectural design intent do their nodes and directed edges encode?",
+        "contexts": [],
+        "ground_truth": "AFGs are a feature-based geometric representation format.\n* **Nodes:** Encode concrete CAD design features (e.g., extrusions, ribs, pockets, holes) along with their local geometric parameters.\n* **Directed Edges:** Encode the spatial, geometric, or parametric dependency relationships between those features, preserving design intent."
+    },
+    {
+        "question": "What specific engineering dataset was utilized for the surrogate-modeling case study to demonstrate the performance evaluation capabilities of the AFG framework?",
+        "contexts": [],
+        "ground_truth": "The framework was evaluated using the **CarHoods 10K** automotive hood frame dataset."
+    },
+    {
+        "question": "What specific class of neural network architecture is trained directly on the AFG representations to serve as an evaluation engine for predicting mechanical performance metrics?",
+        "contexts": [],
+        "ground_truth": "A **Graph Neural Network (GNN)** is trained end-to-end directly on the CAD-derived feature graphs."
+    }
+]

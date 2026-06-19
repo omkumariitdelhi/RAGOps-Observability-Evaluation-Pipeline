@@ -1,0 +1,15 @@
+langchain
+langchain-community
+langchain-openai
+chromadb
+rank_bm25
+sentence-transformers
+ragas
+pytest
+pypdf
+beautifulsoup4
+pyyaml
+python-dotenv
+fastapi
+uvicorn[standard]
+httpx
