@@ -1,85 +1,121 @@
-# RAGOps Observability Evaluation Pipeline
+# RAGOps Observability & Evaluation Pipeline
 
-An advanced, production-ready Retrieval-Augmented Generation (RAG) application with a modern frontend and a scalable FastAPI backend. This pipeline allows for parallel querying of multiple state-of-the-art Large Language Models (LLMs) to compare responses, ensuring robustness and high-quality generation.
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![Langfuse](https://img.shields.io/badge/Langfuse-Observability-orange)
+![Ragas](https://img.shields.io/badge/Ragas-LLM%20Evaluation-brightgreen)
+![Streamlit](https://img.shields.io/badge/Streamlit-SRE%20Dashboard-red)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-Multi--LLM-black)
 
-## 🚀 Features
+A production-grade Retrieval-Augmented Generation (RAG) evaluation and observability pipeline. This project systematically tests multiple leading open-source LLMs against a custom knowledge base, evaluates their faithfulness/hallucination rates using an LLM-as-a-Judge (GPT-4o), traces the execution using **Langfuse**, and visualizes real-time SRE metrics via a **Streamlit Dashboard**.
 
-- **Parallel LLM Querying:** Simultaneously query multiple OpenRouter models (e.g., LLaMA 3.3, Kimi K2.6, Gemma, OpenAI models) in parallel using `asyncio` for rapid inference and response comparison.
-- **Advanced Retrieval:** Employs a pre-warmed singleton `HybridReRankedRetriever` combining dense vector search (ChromaDB) with cross-encoder reranking (`ms-marco-MiniLM`) for highly accurate context fetching.
-- **Sleek Frontend:** A beautifully designed glassmorphic UI built with React. Features a dropdown selector to cleanly toggle between different model responses in real-time.
-- **Extensible Architecture:** Designed with maintainability in mind. Easy to swap embedding models, generation endpoints, and observability hooks.
+---
 
-## 📂 Project Structure
+## 🏗️ Architecture & Features
 
-```
+This pipeline mimics a true MLOps/RAGOps workflow:
+
+1. **Multi-Model Regression Testing (`tests/test_rag_regression.py`)**
+   - Iterates through multiple LLMs (e.g., Gemma-4, GPT-OSS, Kimi).
+   - Generates answers across a curated set of benchmark questions (`rag_evaluation_questions.md`).
+2. **LLM-as-a-Judge Evaluation (`ragas`)**
+   - Employs **Ragas** (specifically the `faithfulness` metric) leveraging GPT-4o to evaluate the baseline generations for hallucinations.
+3. **Observability & Tracing (`Langfuse`)**
+   - Uses the Langfuse SDK (`@observe()`) to seamlessly intercept prompts, retrieval contexts, and generation latencies.
+   - Pushes execution traces and Ragas scores directly to the Langfuse Cloud.
+4. **SRE Metrics Dashboard (`src/dashboard/app.py`)**
+   - A custom Streamlit dashboard that continuously pulls scoring telemetry from the Langfuse API.
+   - Calculates a true moving average of generation quality across all deployed LLMs.
+5. **CI/CD Integration**
+   - Includes a GitHub Actions workflow (`.github/workflows/rag_eval.yml`) to run the regression suite automatically on pull requests.
+
+---
+
+## 📂 Repository Structure
+
+```text
 .
-├── Docs/                  # PDF documents for vector database ingestion
-├── config/                # YAML configuration for prompts and pipelines
-├── chroma_db/             # Local vector database (persisted)
-├── frontend/              # React frontend application
-│   ├── src/               # UI components, styles (index.css), and API bindings
-│   └── package.json       # Node dependencies
-├── src/                   # FastAPI backend application
-│   ├── api.py             # FastAPI entrypoint and endpoints
-│   ├── generation.py      # LLM wrappers and RAG pipeline logic
-│   ├── retrieval.py       # Embedding models and reranking logic
-│   └── config.py          # Environment variables and API keys mapping
-├── tests/                 # Quality and regression testing
-└── requirements.txt       # Python backend dependencies
+├── src/
+│   ├── dashboard/       # Streamlit SRE Dashboard
+│   │   └── app.py       # Fetches telemetry from Langfuse API
+│   └── rag_app/         # Core Generation & Prompt logic
+│       ├── pipeline.py  # Hybrid retriever & generator wrapper
+│       └── prompts.py   # RAG System Prompts
+├── tests/
+│   ├── test_rag_regression.py  # Pytest suite for multi-model Ragas evaluation
+│   └── golden_dataset.json     # Ground truth for baseline comparisons
+├── parse_md.py                 # Utility to ingest and parse custom markdown datasets
+├── rag_evaluation_questions.md # Benchmark evaluation questions
+├── .env.example                # Template for required API keys
+└── requirements.txt            # Python dependencies
 ```
 
-## 🛠️ Setup Instructions
+---
 
-### 1. Backend Setup
+## 🚀 Getting Started
 
-1. **Create a Virtual Environment:**
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
+### 1. Environment Setup
 
-2. **Install Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+Clone the repository and install the dependencies:
 
-3. **Environment Configuration:**
-   - Create a `.env` file in the root directory.
-   - Add your API keys securely:
-     ```env
-     OPENROUTER_API_KEY=your_key_here
-     ```
-   *(Note: Specific OpenRouter models may have custom keys assigned in `src/config.py`)*
+```bash
+git clone https://github.com/omkumariitdelhi/RAGOps-Observability-Evaluation-Pipeline.git
+cd RAGOps-Observability-Evaluation-Pipeline
+python -m venv .venv
+source .venv/Scripts/activate  # On Windows
+pip install -r requirements.txt
+```
 
-4. **Run the Backend:**
-   ```bash
-   python -m uvicorn src.api:app --host 0.0.0.0 --port 8000
-   ```
+### 2. Configure API Keys
 
-### 2. Frontend Setup
+Create a `.env` file based on `.env.example`:
 
-1. **Navigate to the frontend directory:**
-   ```bash
-   cd frontend
-   ```
+```bash
+cp .env.example .env
+```
 
-2. **Install Node modules:**
-   ```bash
-   npm install
-   ```
+Populate it with your credentials:
+- **Langfuse:** Get your keys from [Langfuse Cloud](https://cloud.langfuse.com)
+- **OpenRouter:** Get your multi-model access keys from [OpenRouter](https://openrouter.ai) (Ensure you have credits for the evaluator model).
 
-3. **Run the Development Server:**
-   ```bash
-   npm run dev
-   ```
+```env
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_HOST="https://cloud.langfuse.com"
 
-## 🧠 Usage
+OPENROUTER_API_KEY="sk-or-..."
+GPT4O_API_KEY="sk-or-..."
+```
 
-1. Open your browser and navigate to the local frontend server (typically `http://localhost:5173`).
-2. Type a query into the sleek search bar.
-3. The backend will simultaneously execute a high-accuracy retrieval and ping multiple configured models.
-4. Use the dropdown menu in the UI to seamlessly flip between how different LLMs answered your query based on the retrieved context.
+*(Note: Never commit your `.env` file. It is safely ignored in `.gitignore`.)*
 
-## 🛡️ License
+### 3. Run the Evaluation Suite
 
-This project is licensed under the MIT License.
+Kick off the Pytest suite to generate answers across all models and score them with GPT-4o:
+
+```bash
+pytest tests/test_rag_regression.py -s -v
+```
+
+As the test runs, traces and `faithfulness` scores will immediately populate in your Langfuse Cloud project.
+
+### 4. Launch the SRE Dashboard
+
+In a separate terminal window, launch the Streamlit dashboard to monitor the moving average of your RAG metrics:
+
+```bash
+streamlit run src/dashboard/app.py
+```
+
+Open [http://localhost:8501](http://localhost:8501) to view the live dashboard.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Frameworks:** LangChain, Streamlit, Pytest
+* **Observability:** Langfuse SDK & API
+* **Evaluation:** Ragas (Retrieval Augmented Generation Assessment)
+* **LLMs:** OpenAI (GPT-4o), Anthropic, Meta (Llama-3), Google (Gemma) via OpenRouter
+
+---
+*Built to showcase production-grade AI observability and MLOps engineering capabilities.*
